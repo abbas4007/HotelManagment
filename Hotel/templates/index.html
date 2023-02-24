@@ -1,0 +1,14 @@
+<html>
+{% for room in rooms %}
+
+{{ room.number}}<br>
+
+<form action="" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Reserved">
+</form>
+<!-- <a href="{% url 'hotel:reserved' room.id %}">reserved</a><br> -->
+
+{% endfor %}
+</html>
