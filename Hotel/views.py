@@ -37,10 +37,13 @@ class ReservedView(View):
         return render(request,'reserved.html',{'form':form})
 
     def post(self, request, room_id):
-        room = Room.objects.get(pk = room_id)
+        room = Room.objects.get(number = room_id)
         form = self.form_class(request.POST,instance=room)
+        # print('***********')
+        # print(room)
         if form.is_valid():
             new_room = form.save(commit=False)
             new_room.is_availble = False
             new_room.save()
+
         return redirect('hotel:home')
