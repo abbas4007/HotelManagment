@@ -2,14 +2,19 @@ from django.shortcuts import render, redirect
 from django.views import View
 from .forms import AddForm
 from .models import Room
+from .serializers import ServiceSerializer
+
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
 # Create your views here.
 class HomeView(View):
 
-     def get(self,request):
-         rooms = Room.objects.all()
-         form = AddForm()
+	 def get(self,request):
+		 rooms = Room.objects.all()
+		 form = AddForm()
 
-         return render(request,'index.html',{"rooms":rooms,'form':form})
+		 return render(request,'index.html',{"rooms":rooms,'form':form})
 
 
 # class DetailView(View):
@@ -24,31 +29,46 @@ class HomeView(View):
 
 
 class ReservedView(View):
-    form_class = AddForm
-    # def dispatch(self, request, *args, **kwargs):
-    #     super().dispatch(request, *args, **kwargs)
+	form_class = AddForm
+	# def dispatch(self, request, *args, **kwargs):
+	#     super().dispatch(request, *args, **kwargs)
 
-    #     room = Room.objects.get(pk = kwargs['id'])
-    #     # room.is_availble = False
-    #     return render(request,'reserved.html',{'room':room})
+	#     room = Room.objects.get(pk = kwargs['id'])
+	#     # room.is_availble = False
+	#     return render(request,'reserved.html',{'room':room})
 
 
-    # def get(self,request,id):
-    #     form =self.form_class
-    #     return render(request,'reserved.html')
+	# def get(self,request,id):
+	#     form =self.form_class
+	#     return render(request,'reserved.html')
 
-    def post(self, request, room_number):
-        print('***********')
-        print("hello")
-        print('***********')
+	def post(self, request, room_number):
+		print('***********')
+		print("hello")
+		print('***********')
 
-        room = Room.objects.get(number = room_number)
-        form = self.form_class(request.POST,instance=room)
-        # print('***********')
-        # print(room)
-        if form.is_valid():
-            new_room = form.save(commit=False)
-            new_room.is_availble = False
-            new_room.save()
+		room = Room.objects.get(number = room_number)
+		form = self.form_class(request.POST,instance=room)
+		# print('***********')
+		# print(room)
+		if form.is_valid():
+			new_room = form.save(commit=False)
+			new_room.is_availble = False
+			new_room.save()
 
-        return redirect('hotel:home')
+		return redirect('hotel:home')
+	
+class ReservedvApi(APIView):
+	serializer_class = ServiceSerializer
+	def post(self, request):
+		ser_data = ServiceSerializer(data = request.data)
+		if ser_data.is_valid():		
+			ser = Room.objects.filter(ser_data.validated_data['number'])
+			if ser.validated_data['is_availble'] == True:
+				ser.save(commit=False)
+				ser.validated_data['is_availble'] = False
+				ser.save()       
+				return Response(ser.data, status=status.HTTP_200_OK)
+		return Response(ser.data, status=status.HTTP_400_BAD_REQUEST)
+
+	
