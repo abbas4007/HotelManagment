@@ -6,3 +6,5 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ('number',)
+
+        
